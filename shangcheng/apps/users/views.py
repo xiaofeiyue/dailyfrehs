@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse
 from django.views import View
+from django_redis import get_redis_connection
 from pymysql import DatabaseError
 
 from apps.users.models import User
@@ -36,6 +37,18 @@ class RegisterView(View):
         # 判断手机号是否合法
         if not re.match(r'^1[3-9]\d{9}$', mobile):
             return http.HttpResponseBadRequest('请输入正确的手机号码')
+        # 判断短信验证码
+        # 接受短信验证码参数
+        sms_code_client = request.POST.get('sms_code')
+        # 验证数据
+        # 1.链接数据库
+        redis_conn = get_redis_connection('code')
+        sms_code_server = redis_conn.get('sms_%s' % mobile)
+        # 判断短信验证码是否过期
+        if sms_code_server is None:
+            return render(request,'register.html')
+        if sms_code_client != sms_code_server.decode():
+            return render(request,'register.html')
         # 判断是否勾选用户协议
         if allow != 'on':
             return http.HttpResponseBadRequest('请勾选用户协议')

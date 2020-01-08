@@ -58,14 +58,35 @@ var vm = new Vue({
         },
         // 检查用户名
         check_username: function () {
+            // alert('hot')
             var re = /^[a-zA-Z0-9_-]{5,20}$/;
             if (re.test(this.username)) {
                 this.error_name = false;
+
+            //    理论上来说写在这里
             } else {
                 this.error_name_message = '请输入5-20个字符的用户名';
                 this.error_name = true;
             }
 
+            //1.拼接url
+            // let url='http://www.meiduo.site:8000/usernames/itcast/count/'
+
+            let url='/usernames/'+this.username+'/count/'
+            // 2.发送请求
+            axios.get(url).then(response=>{
+
+                if(response.data.count=='0'){
+                    this.error_name=false
+                }else {
+                    this.error_name=true
+                    this.error_name_message='哥哥你的用户名好像和嫂子一样哎,换一个'
+                }
+
+            }).catch(error=>{
+
+            })
+            // 3.成功和失败的处理
 
         },
         // 检查密码
@@ -89,11 +110,31 @@ var vm = new Vue({
         check_mobile: function () {
             var re = /^1[345789]\d{9}$/;
             if (re.test(this.mobile)) {
-                this.error_phone = false;
+                this.error_mobile = false;
+
+                //应该是在这里写
             } else {
                 this.error_mobile_message = '您输入的手机号格式不正确';
-                this.error_phone = true;
+                this.error_mobile = true;
             }
+
+            alert('sending~~~~');
+            //1.拼接url
+            let url = 'http://www.meiduo.site:8000/mobiles/'+this.mobile+'/count/';
+            //2.发送请求
+            axios.get(url).then(response=>{
+                alert('success');
+                //3.成功/失败回调完成业务逻辑
+               if(response.data.count == '0'){
+                   this.error_mobile=false;
+               }else {
+                   this.error_mobile=true;
+                   this.error_mobile_message='手机号大嫂注册过了,你用你表妹的吧';
+               }
+            }).catch(error=>{
+                alert('failed');
+            })
+
 
         },
         // 检查图片验证码
@@ -183,6 +224,7 @@ var vm = new Vue({
         },
         // 表单提交
         on_submit(){
+            // alert('提交注册')
             this.check_username();
             this.check_password();
             this.check_password2();
