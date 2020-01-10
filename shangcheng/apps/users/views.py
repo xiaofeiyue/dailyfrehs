@@ -114,6 +114,8 @@ class LoginView(View):
         username = data.get('username')
         password = data.get('password')
         remembered = data.get('remembered')
+        # 登录之后跳转到首页还是个人中心有next决定
+        next = request.GET.get('next')
 
         # 验证参数
         if not all([username,password,remembered]):
@@ -158,10 +160,20 @@ class LoginView(View):
         我们用cookie去实现,如果是登录用户将用户名保存到cookie中,提取cookie中的信息,
 
         """
+        """
+        在首页如何用户没有登录点击到个人中心,会跳转到登录页面登录之后进入到
+        个人中心,而不是首页,
+        这里需要判断登录之后跳转到哪里,是首页还是个人中心
+        跳转到个人中心的urlhttp://www.meiduo.site:8000/login/?next=/user_center/
 
 
-        # 响应登录结果
-        response =  redirect(reverse('contents:index'))
+        """
+        if next:
+            response = redirect(next)
+        else:
+
+            # 响应登录结果
+            response =  redirect(reverse('contents:index'))
         response.set_cookie('username',user.username,max_age=3600)
         return response
 
@@ -192,7 +204,27 @@ class LogoutView(View):
 
 
 
+# 用户中心的展示
+
+"""
+登录用户才能进去,如果用户没有登录就跳转到登录页面
+LoginrequiredMixin:可以帮助我们做用户的登录验证
+如果没有登录,默认会跳转到account/login/
+"""
+from django.contrib.auth.mixins import LoginRequiredMixin
+class UserCenterView(LoginRequiredMixin,View):
+    def get(self,request):
+
+        return render(request,'user_center_info.html')
 
 
 
+"""
+使用python manage.py shell 查看类视图的继承顺序
+from apps.users.views import UserCenterView
+>>> UserCenterView.__mro__
+(<class 'apps.users.views.UserCenterView'>, <class 'django.contrib.auth.mixins.LoginRequiredMixin'>, <class 'django.contrib.auth.mixins.AccessMixin'>, <class 'django.views.generic.base.View'>, <class 'object'>)
+>>>
 
+
+"""

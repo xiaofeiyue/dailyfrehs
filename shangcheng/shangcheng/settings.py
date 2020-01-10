@@ -226,3 +226,12 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS=[
     'apps.users.utils.UsernameMobileBackend'
 ]
+
+
+"""
+用户中心,登录用户才能访问,如果没有登录跳转到登录页面
+    resolved_url = resolve_url(login_url or settings.LOGIN_URL)
+路由要么是传进去,要么是在setting中设置
+"""
+
+LOGIN_URL='/login/'
