@@ -1,6 +1,6 @@
 import re
 from django import http
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -134,7 +134,7 @@ class LoginView(View):
         from django.contrib.auth.backends import ModelBackend
         user = authenticate(username=username,password = password)
         if user is None:
-            return render(request,'login.html')
+            return redirect(request,'login.html')
 
         # 实现状态保持
         login(request,user)
@@ -148,8 +148,22 @@ class LoginView(View):
             # 记住用户,None默认两周后过期
             request.session.set_expiry(None)
 
+
+
+        # is_authenticated是否是认证用户
+        # request.user.is_authenticated
+
+        """
+        用户登录之后,返回到首页,上面应该显示用户,不应该显示登录
+        我们用cookie去实现,如果是登录用户将用户名保存到cookie中,提取cookie中的信息,
+
+        """
+
+
         # 响应登录结果
-        return render(reverse('contents:index'))
+        response =  redirect(reverse('contents:index'))
+        response.set_cookie('username',user.username,max_age=3600)
+        return response
 
 
 
@@ -157,24 +171,23 @@ class LoginView(View):
 
 
 
+class LogoutView(View):
+    def get(self,request):
 
 
+        """
+        退出,就是删除状态保持的信息,然后重定向
+        :param request:
+        :return:
+        """
+        logout(request)
 
+        # 还要删除cookie总的用户名
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #
+        # 跳转到首页
+        response =  redirect(reverse('contents:index'))
+        response.delete_cookie('username')
+        return response
 
 
 
