@@ -26,6 +26,7 @@ class ImageCodeView(View):
 
         redis_conn = get_redis_connection('code')
         redis_conn.setex('img_%s'% uuid,IMAGE_CODE_EXPIRE_TIME,text)
+
         return http.HttpResponse(image,content_type='image/jpeg')
     """
     content_type :所对应的是MIME类型
@@ -114,10 +115,33 @@ class SmsCodeView(View):
         from random import randint
         sms_code = '%06d' % randint(0,999999)
         # sms_code = randint(100000,999999)
-        redis_conn.setex('sms_%s'%mobile,300,sms_code)
+        # redis_conn.setex('sms_%s'%mobile,300,sms_code)
+        # # 发送短信验证码之后，添加标记位
+        # redis_conn.setex('send_flag_%s'%mobile,60,1)
+
+        """
+        优化:提升redis 性能
+        ：使用pipline 管道
+
+        １．创建管道
+        ２．将任务添加到管道中
+        ３．执行管道
+
+
+        """
+        pipe = redis_conn.pipeline()
+        pipe.setex('sms_%s' % mobile, 300, sms_code)
         # 发送短信验证码之后，添加标记位
-        redis_conn.setex('send_flag_%s'%mobile,60,1)
-        CCP().send_template_sms(mobile,[sms_code,5],1)
+        pipe.setex('send_flag_%s' % mobile, 60, 1)
+        pipe.execute()
+
+
+
+
+        # CCP().send_template_sms(mobile,[sms_code,5],1)
+        from celery_tasks.sms.tasks import send_sms_code
+        # delay 的参数同任务
+        send_sms_code.delay(mobile,sms_code)
 
         # 使用容联运发送短信
         # 返回响应

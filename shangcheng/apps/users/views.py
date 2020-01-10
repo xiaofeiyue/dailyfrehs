@@ -101,3 +101,85 @@ class MobileCountView(View):
         return http.JsonResponse({'code': 0, 'errmsg': 'ok', 'count': count})
 
 
+
+
+
+
+class LoginView(View):
+    def get(self,request):
+        return render(request,'login.html')
+
+    def post(self,request):
+        data = request.POST
+        username = data.get('username')
+        password = data.get('password')
+        remembered = data.get('remembered')
+
+        # 验证参数
+        if not all([username,password,remembered]):
+            return http.HttpResponseBadRequest('缺少参数')
+        # 判断用户名是否符合规则
+        if not re.match(r'[a-zA-Z0-9_-]{5,20}',username):
+            return http.HttpResponseBadRequest("用户名不符合规则")
+
+
+        # 判断密码是否符合规则
+        if not re.match(r'[a-zA-Z0-9]{8,20}',password):
+            return http.HttpResponseBadRequest('密码不符合规定')
+
+
+        # 判断用户名和密码是否正确,使用django的后端认证
+        # 认证登陆用户
+        from django.contrib.auth import authenticate
+        from django.contrib.auth.backends import ModelBackend
+        user = authenticate(username=username,password = password)
+        if user is None:
+            return render(request,'login.html')
+
+        # 实现状态保持
+        login(request,user)
+
+
+        # 设置状态保持的周期
+        if remembered != 'on':
+            # 没有记住用户,浏览器关闭回话就会结束
+            request.session.set_expiry(0)
+        else:
+            # 记住用户,None默认两周后过期
+            request.session.set_expiry(None)
+
+        # 响应登录结果
+        return render(reverse('contents:index'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #
+
+
+
+
+
+
+
+
