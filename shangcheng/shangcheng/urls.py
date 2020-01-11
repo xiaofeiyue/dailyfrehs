@@ -21,5 +21,7 @@ urlpatterns = [
     url('admin/', admin.site.urls),
     url(r'',include(('apps.users.urls','users'),namespace='users')),
     url(r'',include(('apps.contents.urls','contents'),namespace='contents')),
-    url(r'',include(('apps.verifications.urls','verifications'),namespace='verifications'))
+    url(r'',include(('apps.verifications.urls','verifications'),namespace='verifications')),
+    # QQ 登录
+    url(r'',include(('apps.QQlogin.urls','QQlogin'),namespace='QQlogin')),
 ]
