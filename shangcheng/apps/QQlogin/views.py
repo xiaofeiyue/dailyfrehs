@@ -75,3 +75,65 @@ class QQLoginView(View):
         login_url = oauth.get_qq_url()
 
         return http.JsonResponse({'code':'ok','errmsg':'ok','login_url':login_url})
+
+
+
+
+class QQUserView(View):
+    def get(self,request):
+        # 获取code
+        code = request.GET.get('code')
+
+        print(code)
+
+        state = request.GET.get('state')
+        if code is None:
+            return http.HttpResponseBadRequest('参数缺失')
+        oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID,
+                        client_secret=settings.QQ_CLIENT_SECRET,
+                        redirect_uri=settings.QQ_REDIRECT_URI,
+                        state=state)
+
+        token = oauth.get_access_token(code)
+        print(token)
+
+        oppenid = oauth.get_open_id(token)
+        print(oppenid)
+
+
+
+        return render(request,'oauth_callback.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
