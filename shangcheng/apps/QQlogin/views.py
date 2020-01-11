@@ -1,10 +1,13 @@
 from QQLoginTool.QQtool import OAuthQQ
 from django import http
-from django.shortcuts import render
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
 
 # Create your views here.
+from django.urls import reverse
 from django.views import View
 
+from apps.QQlogin.models import OAuthQQUser
 from shangcheng import settings
 
 """
@@ -97,10 +100,27 @@ class QQUserView(View):
         token = oauth.get_access_token(code)
         print(token)
 
-        oppenid = oauth.get_open_id(token)
-        print(oppenid)
+        openid = oauth.get_open_id(token)
+        print(openid)
+        """
+        根据openid进行查询,
+        如果查询有相应的记录,说明用户之间绑定过,直接登录
+        如果查询没有记录,说明用户没有绑定,返回到绑定页面,实现绑定
 
 
+
+        """
+        try:
+            qquser = OAuthQQUser.objects.get(openid=openid)
+        except OAuthQQUser.DoesNotExist:
+            # 没有绑定,应该绑定
+            pass
+        else:
+            # 有记录走else:,没有异常走else
+
+            # 设置登录状态,跳转到首页(重定向)
+            login(request,qquser)
+            return redirect(reverse('contents:index'))
 
         return render(request,'oauth_callback.html')
 
