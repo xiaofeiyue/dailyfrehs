@@ -214,8 +214,35 @@ LoginrequiredMixin:可以帮助我们做用户的登录验证
 from django.contrib.auth.mixins import LoginRequiredMixin
 class UserCenterView(LoginRequiredMixin,View):
     def get(self,request):
+        #其他常用HttpRequest对象属性
+        #user：请求的用户对象
 
-        return render(request,'user_center_info.html')
+        # 获取登录用户
+        user = request.user
+        context = {
+            'username':user.username,
+            'mobile':user.mobile,
+            'email':user.email,
+            'email_active':user.email_active
+        }
+
+
+
+
+        return render(request,'user_center_info.html',context=context)
+
+
+"""
+我们需要添加一个字段来记录用户的邮箱是否激活
+2.我们需要返回,用户名,邮箱,邮箱的激活状态,手机号等信息
+3.让模板进行渲染,或者vue渲染
+
+
+"""
+
+
+
+
 
 
 
