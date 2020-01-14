@@ -10,4 +10,8 @@ urlpatterns = [
 
     # 用户中心
     url(r'^user_center/$',views.UserCenterView.as_view(),name='user_center'),
+
+
+    # 发送邮件
+    url(r'^emails/$',views.EmailView.as_view(),name='email'),
 ]

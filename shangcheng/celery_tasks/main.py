@@ -29,7 +29,13 @@ app.config_from_object('celery_tasks.config')
 
 # 自动检测
 # 队列元素是任务的包路径
-app.autodiscover_tasks(['celery_tasks.sms'])
+app.autodiscover_tasks(['celery_tasks.sms','celery_tasks.email'])
 
 # 5.通过指令创建消费者
 # celery -A celery_tasks.main worker -l info
+
+
+
+
+
+

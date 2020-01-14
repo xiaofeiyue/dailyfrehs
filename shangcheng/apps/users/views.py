@@ -1,3 +1,4 @@
+import json
 import re
 from django import http
 from django.contrib.auth import login, logout
@@ -10,6 +11,7 @@ from django_redis import get_redis_connection
 from pymysql import DatabaseError
 
 from apps.users.models import User
+from utils.views import LoginRequiredJsonMixin
 
 
 class RegisterView(View):
@@ -239,6 +241,88 @@ class UserCenterView(LoginRequiredMixin,View):
 
 
 """
+
+
+
+"""
+发送邮件的问题:
+1.后端和前端是进行ajax交互,
+但是LoginRequiredMixin,返回的不是ajax
+应该重写后端的LoginRequiredMixin
+
+class LoginRequiredMixin(AccessMixin):
+    # Verify that the current user is authenticated.
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+写在了utils下的view中
+
+"""
+
+
+
+
+
+
+# 邮件
+class EmailView(LoginRequiredJsonMixin,View):
+    def put(self,request):
+        # 接受数据,,ajax,接受json数据,put 中的body中
+        body = request.body
+        body_str = body.decode()
+        data = json.loads(body_str)
+
+        # 验证数据
+        email = data.get('email')
+        if email is None:
+            return http.JsonResponse({'code':'ok','errmsg':'没有得到email'})
+        if not re.match(r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$',email):
+            return http.HttpResponseBadRequest('邮箱不符合规则')
+        # 更新数据
+        # 先获取的用户，再进行更新
+        # 对数据库进行操作，要进行数据捕获
+        try:
+            user = request.user
+            user.email = email
+            user.save()
+        except User.DoesNotExist:
+            return http.HttpResponseBadRequest('数据库更新失败')
+
+        # 发送邮件，进行激活
+        # # 使用ｄｊａｎｇｏ里面send_mail 发送邮件
+        # from django.core.mail import send_mail
+        # #subject,:主题
+        # #  message, :内容
+        # # from_email,发件人
+        # #  recipient_list:收件人
+        # subject='你好啊!欢迎'
+        #
+        # message = ""
+        # from_email='<wangyfmy@126.com>'
+        # recipient_list=[email]
+        #
+        # html_message = "<a href='#'>欢迎<a/>"
+        #
+        #
+        # send_mail(subject=subject,
+        #           message=message,
+        #           from_email=from_email,
+        #           recipient_list=recipient_list,
+        #           fail_silently=False,
+        #           auth_user=None,
+        #           auth_password=None,
+        #           connection=None,
+        #           html_message=html_message)
+        # # html_message 可以设置html
+        #
+
+        from celery_tasks.email.tasks import celery_send_email_action
+        celery_send_email_action.delay(email)
+
+        # 返回响应
+        return http.JsonResponse({'code':'ok','errmsg':'ok'})
+
 
 
 

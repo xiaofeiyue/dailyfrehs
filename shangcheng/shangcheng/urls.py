@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'',include(('apps.verifications.urls','verifications'),namespace='verifications')),
     # QQ 登录
     url(r'',include(('apps.QQlogin.urls','QQlogin'),namespace='QQlogin')),
+    url(r'',include(('apps.areas.urls','areas'),namespace='areas')),
 ]
