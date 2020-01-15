@@ -316,6 +316,7 @@ EMAIL_FROM = '美多商城<qi_rui_hua@163.com>'
 
 
 
+# pycharm 中使用git   ctrl+j + k
 
 
 
