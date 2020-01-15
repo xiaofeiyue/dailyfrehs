@@ -1,7 +1,15 @@
 from django.conf.urls import url
 
-from apps.areas.views import AddressView
+from apps.areas.views import  AreasView
+
 
 urlpatterns = [
-    url(r'^areas/$',AddressView.as_view(),name='address')
+
+    url(r'^areas/$',AreasView.as_view(),name='area'),
+
+
 ]
+
+
+
+

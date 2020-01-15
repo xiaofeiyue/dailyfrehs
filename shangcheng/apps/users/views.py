@@ -339,3 +339,32 @@ from apps.users.views import UserCenterView
 
 
 """
+
+
+
+# 邮件激活
+class EmailActiveView(View):
+    def get(self,request):
+        token = request.GET.get('token')
+        if token is None:
+            return http.HttpResponseBadRequest('参数不全')
+
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return http.HttpResponseBadRequest('没有次用户')
+        user.email_active = True
+        user.save()
+        return redirect(reverse('users:center'))
+
+
+
+
+
+
+class UserAddressView(View):
+    def get(self,request):
+        return render(request,'user_center_site.html')
+
+
+

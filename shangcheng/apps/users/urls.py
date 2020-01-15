@@ -14,4 +14,12 @@ urlpatterns = [
 
     # 发送邮件
     url(r'^emails/$',views.EmailView.as_view(),name='email'),
+
+    # 邮件激活
+    url(r'^emails_active/$', views.EmailActiveView.as_view(), name='email_acctive'),
+
+
+
+    # 用户中心的展示
+    url(r'^address/$',views.UserAddressView.as_view(),name='address'),
 ]
